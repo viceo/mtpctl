@@ -27,7 +27,7 @@ func main() {
 		defer device.Close()
 
 		// Inquiry device
-		idPage := inquiry.NewDeviceIdentification(device)
+		idPage := inquiry.Run(device)
 		if idPage.PheripherialDeviceType == 8 {
 			mediaChangers = append(mediaChangers, idPage)
 		}

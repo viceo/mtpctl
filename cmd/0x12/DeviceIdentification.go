@@ -24,7 +24,7 @@ type DeviceIdentification struct {
 	UnitSerialNumber       string   `json:"unitSerialNumber"`
 }
 
-func NewDeviceIdentification(device *os.File) DeviceIdentification {
+func Run(device *os.File) DeviceIdentification {
 	cmd := sg.SgCmd{
 		Cdb:            []byte{0x12, 0x01, 0x83, 0x00, 0xFF, 0x00},
 		DataBuffer:     make([]byte, 96),
@@ -38,8 +38,11 @@ func NewDeviceIdentification(device *os.File) DeviceIdentification {
 	util.PanicIfError(syscallerr)
 	util.PanicIfError(scsierr)
 
+	return newDeviceIdentification(cmd, device)
+}
+
+func newDeviceIdentification(cmd sg.SgCmd, device *os.File) DeviceIdentification {
 	return DeviceIdentification{
-		cmd:                    cmd,
 		Device:                 device,
 		DeviceName:             device.Name(),
 		PheripherialQualifier:  cmd.DataBuffer[0] >> 4,
