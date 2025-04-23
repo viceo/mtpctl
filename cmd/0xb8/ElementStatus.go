@@ -17,7 +17,6 @@ type ElementStatusPages struct {
 }
 
 type ElementStatusHeader struct {
-	cmd                         sg.SgCmd
 	FirstElementAddressReported uint16             `json:"firstElementAddressReported"`
 	NumberOfElementsReported    uint16             `json:"numberOfElementsReported"`
 	ElementStatusPagesByteCount uint32             `json:"elementStatusPagesByteCount"`
@@ -34,26 +33,26 @@ func Run(device *os.File) ElementStatusHeader {
 		Flags:          uint32(0),
 	}
 
-	syscallerr, scsierr := sg.ExecCmd(cmd, device)
+	syscallerr, scsierr := sg.ExecCmd(&cmd, device)
 	util.PanicIfError(syscallerr)
 	util.PanicIfError(scsierr)
-	return newElementStatus(cmd)
+	return newElementStatus(&cmd)
 }
 
-func newElementStatus(cmd sg.SgCmd) ElementStatusHeader {
+func newElementStatus(cmd *sg.SgCmd) ElementStatusHeader {
+	buffer := cmd.DataBuffer[0:8]
 	return ElementStatusHeader{
-		cmd:                         cmd,
-		FirstElementAddressReported: binary.BigEndian.Uint16(cmd.DataBuffer[0:2]),
-		NumberOfElementsReported:    binary.BigEndian.Uint16(cmd.DataBuffer[2:4]),
+		FirstElementAddressReported: binary.BigEndian.Uint16(buffer[0:2]),
+		NumberOfElementsReported:    binary.BigEndian.Uint16(buffer[2:4]),
 		// Pack the three bytes in a uint32 (4 bytes)
-		ElementStatusPagesByteCount: uint32(cmd.DataBuffer[5])<<16 |
-			uint32(cmd.DataBuffer[6])<<8 |
-			uint32(cmd.DataBuffer[7]),
+		ElementStatusPagesByteCount: uint32(buffer[5])<<16 |
+			uint32(buffer[6])<<8 |
+			uint32(buffer[7]),
 		ElementStatusPages: newElementStatusPages(cmd),
 	}
 }
 
-func newElementStatusPages(cmd sg.SgCmd) ElementStatusPages {
+func newElementStatusPages(cmd *sg.SgCmd) ElementStatusPages {
 	buffer := cmd.DataBuffer[8:16]
 	return ElementStatusPages{
 		ElementTypeCode:          buffer[0],

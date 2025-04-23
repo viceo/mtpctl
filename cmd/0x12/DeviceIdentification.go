@@ -33,26 +33,27 @@ func Run(device *os.File) DeviceIdentification {
 		Flags:          uint32(0),
 	}
 
-	syscallerr, scsierr := sg.ExecCmd(cmd, device)
+	syscallerr, scsierr := sg.ExecCmd(&cmd, device)
 	util.PanicIfError(syscallerr)
 	util.PanicIfError(scsierr)
 
-	return newDeviceIdentification(cmd, device)
+	return newDeviceIdentification(&cmd, device)
 }
 
-func newDeviceIdentification(cmd sg.SgCmd, device *os.File) DeviceIdentification {
+func newDeviceIdentification(cmd *sg.SgCmd, device *os.File) DeviceIdentification {
+	buffer := cmd.DataBuffer[0:42]
 	return DeviceIdentification{
 		Device:                 device,
 		DeviceName:             device.Name(),
-		PheripherialQualifier:  cmd.DataBuffer[0] >> 4,
-		PheripherialDeviceType: cmd.DataBuffer[0] & 0x0F,
-		PageCode:               cmd.DataBuffer[1],
-		PageLength:             cmd.DataBuffer[3],
-		CodeSet:                cmd.DataBuffer[4] & 0x0F,
-		IdentifierType:         cmd.DataBuffer[5] & 0x0F,
-		IdentifierLength:       cmd.DataBuffer[7],
-		VendorIdentification:   strings.TrimSpace(string(cmd.DataBuffer[8:16])),
-		ProductIdentification:  strings.TrimSpace(string(cmd.DataBuffer[16:32])),
-		UnitSerialNumber:       strings.TrimSpace(string(cmd.DataBuffer[32:42])),
+		PheripherialQualifier:  buffer[0] >> 4,
+		PheripherialDeviceType: buffer[0] & 0x0F,
+		PageCode:               buffer[1],
+		PageLength:             buffer[3],
+		CodeSet:                buffer[4] & 0x0F,
+		IdentifierType:         buffer[5] & 0x0F,
+		IdentifierLength:       buffer[7],
+		VendorIdentification:   strings.TrimSpace(string(buffer[8:16])),
+		ProductIdentification:  strings.TrimSpace(string(buffer[16:32])),
+		UnitSerialNumber:       strings.TrimSpace(string(buffer[32:42])),
 	}
 }

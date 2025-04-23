@@ -62,7 +62,7 @@ type SgCmd struct {
 	Flags          uint32
 }
 
-func ExecCmd(cmd SgCmd, device *os.File) (syscallerr error, scsierr error) {
+func ExecCmd(cmd *SgCmd, device *os.File) (syscallerr error, scsierr error) {
 	// Setup sg_io_hdr structure
 	hdr := sgIoHdr{
 		InterfaceID:    SG_INTERFACE_V3,
