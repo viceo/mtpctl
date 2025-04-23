@@ -23,26 +23,28 @@ type ElementStatusHeader struct {
 }
 
 type ElementStatus struct {
-	Header ElementStatusHeader `json:"header"`
-	Pages  ElementStatusPages  `json:"pages"`
+	Header    ElementStatusHeader `json:"header"`
+	Pages     ElementStatusPages  `json:"pages"`
+	SenseData sg.SgSenseData      `json:"senseData"`
 }
 
 func RunElementStatus(device *os.File) ElementStatus {
 	cmd := sg.SgCmd{
 		Cdb:            []byte{0xB8, 0x04, 0x00, 0x00, 0xFF, 0xFF, 0x01, 0x00, 0xFF, 0xFF, 0x00, 0x00},
 		DataBuffer:     make([]byte, 64*1000),
-		SenseBuffer:    make([]byte, 64),
+		SenseBuffer:    make([]byte, 16),
 		DxferDirection: sg.SG_DXFER_FROM_DEV,
 		Timeout:        uint32(30 * 1000), // 30 seconds
 		Flags:          uint32(0),
 	}
 
-	syscallerr, scsierr := sg.ExecCmd(&cmd, device)
+	syscallerr := sg.ExecCmd(&cmd, device)
 	util.PanicIfError(syscallerr)
-	util.PanicIfError(scsierr)
+
 	return ElementStatus{
-		Header: newElementStatusHeader(&cmd),
-		Pages:  newElementStatusPages(&cmd),
+		Header:    newElementStatusHeader(&cmd),
+		Pages:     newElementStatusPages(&cmd),
+		SenseData: cmd.GetSenseData(),
 	}
 }
 

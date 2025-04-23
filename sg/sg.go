@@ -60,13 +60,26 @@ type SgCmd struct {
 	DxferDirection int32
 	Timeout        uint32
 	Flags          uint32
+	Status         uint8
 }
 
-// func (x *SgCmd) Get() {
+type SgSenseData struct {
+	SenseLength uint8  `json:"senseLength"`
+	SenseKey    string `json:"senseKey"`
+	Asc         string `json:"asc"`
+	Ascq        string `json:"ascq"`
+}
 
-// }
+func (x *SgCmd) GetSenseData() SgSenseData {
+	return SgSenseData{
+		SenseLength: uint8(len(x.SenseBuffer)),
+		SenseKey:    fmt.Sprintf("%02x", x.SenseBuffer[2]&0x0F),
+		Asc:         fmt.Sprintf("%02x", x.SenseBuffer[12]),
+		Ascq:        fmt.Sprintf("%02x", x.SenseBuffer[13]),
+	}
+}
 
-func ExecCmd(cmd *SgCmd, device *os.File) (syscallerr error, scsierr error) {
+func ExecCmd(cmd *SgCmd, device *os.File) (syscallerr error) {
 	// Setup sg_io_hdr structure
 	hdr := sgIoHdr{
 		InterfaceID:    SG_INTERFACE_V3,
@@ -93,18 +106,5 @@ func ExecCmd(cmd *SgCmd, device *os.File) (syscallerr error, scsierr error) {
 		syscallerr = fmt.Errorf("IOCTL status:%v", errno)
 	}
 
-	if hdr.Status != 0 {
-		if hdr.SbLenWr > 0 {
-			senseKey := fmt.Sprintf("%02x", cmd.SenseBuffer[2]&0x0F)
-			asc := fmt.Sprintf("%02x", cmd.SenseBuffer[12])
-			ascq := fmt.Sprintf("%02x", cmd.SenseBuffer[13])
-			scsierr = fmt.Errorf("SCSI status:%d code:%s message:%s", hdr.Status,
-				fmt.Sprintf("[%s,%s,%s]", senseKey, asc, ascq),
-				parseSenseCode(senseKey, asc, ascq),
-			)
-		} else {
-			scsierr = fmt.Errorf("SCSI status:%d", hdr.Status)
-		}
-	}
-	return syscallerr, scsierr
+	return syscallerr
 }

@@ -29,14 +29,14 @@ func main() {
 		defer device.Close()
 
 		// Inquiry device
-		idPage := cmd.RunDeviceIdentification(device)
-		if idPage.PheripherialDeviceType == 8 {
-			mediaChangers = append(mediaChangers, idPage)
+		devIdPage := cmd.RunDeviceIdentification(device)
+		if devIdPage.Page.PheripherialDeviceType == 8 {
+			mediaChangers = append(mediaChangers, devIdPage)
 		}
 
 	}
 
-	elementStatus := cmd.RunElementStatus(mediaChangers[0].Device)
+	elementStatus := cmd.RunElementStatus(mediaChangers[0].Page.Device)
 
 	response, err := json.Marshal(jsonResponse{
 		MediaChangers: mediaChangers,

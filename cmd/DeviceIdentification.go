@@ -8,7 +8,7 @@ import (
 	"github.com/viceo/tplibcmd/util"
 )
 
-type DeviceIdentification struct {
+type DeviceIdentificationPage struct {
 	Device                 *os.File `json:"-"`
 	DeviceName             string   `json:"device"`
 	PheripherialQualifier  uint8    `json:"pheripherialQualifier"`
@@ -23,26 +23,33 @@ type DeviceIdentification struct {
 	UnitSerialNumber       string   `json:"unitSerialNumber"`
 }
 
+type DeviceIdentification struct {
+	Page      DeviceIdentificationPage `json:"page"`
+	SenseData sg.SgSenseData           `json:"senseData"`
+}
+
 func RunDeviceIdentification(device *os.File) DeviceIdentification {
 	cmd := sg.SgCmd{
 		Cdb:            []byte{0x12, 0x01, 0x83, 0x00, 0xFF, 0x00},
-		DataBuffer:     make([]byte, 96),
-		SenseBuffer:    make([]byte, 32),
+		DataBuffer:     make([]byte, 128),
+		SenseBuffer:    make([]byte, 16),
 		DxferDirection: sg.SG_DXFER_FROM_DEV,
 		Timeout:        uint32(30 * 1000), // 30 seconds
 		Flags:          uint32(0),
 	}
 
-	syscallerr, scsierr := sg.ExecCmd(&cmd, device)
+	syscallerr := sg.ExecCmd(&cmd, device)
 	util.PanicIfError(syscallerr)
-	util.PanicIfError(scsierr)
 
-	return newDeviceIdentification(&cmd, device)
+	return DeviceIdentification{
+		Page:      newDeviceIdentificationPage(&cmd, device),
+		SenseData: cmd.GetSenseData(),
+	}
 }
 
-func newDeviceIdentification(cmd *sg.SgCmd, device *os.File) DeviceIdentification {
+func newDeviceIdentificationPage(cmd *sg.SgCmd, device *os.File) DeviceIdentificationPage {
 	buffer := cmd.DataBuffer[0:42]
-	return DeviceIdentification{
+	return DeviceIdentificationPage{
 		Device:                 device,
 		DeviceName:             device.Name(),
 		PheripherialQualifier:  buffer[0] >> 4,
