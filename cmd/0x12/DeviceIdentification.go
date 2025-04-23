@@ -9,7 +9,6 @@ import (
 )
 
 type DeviceIdentification struct {
-	cmd                    sg.SgCmd
 	Device                 *os.File `json:"-"`
 	DeviceName             string   `json:"device"`
 	PheripherialQualifier  uint8    `json:"pheripherialQualifier"`
