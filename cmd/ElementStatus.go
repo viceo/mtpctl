@@ -17,13 +17,17 @@ type ElementStatusPages struct {
 }
 
 type ElementStatusHeader struct {
-	FirstElementAddressReported uint16             `json:"firstElementAddressReported"`
-	NumberOfElementsReported    uint16             `json:"numberOfElementsReported"`
-	ElementStatusPagesByteCount uint32             `json:"elementStatusPagesByteCount"`
-	ElementStatusPages          ElementStatusPages `json:"elementStatusPages"`
+	FirstElementAddressReported uint16 `json:"firstElementAddressReported"`
+	NumberOfElementsReported    uint16 `json:"numberOfElementsReported"`
+	ElementStatusPagesByteCount uint32 `json:"elementStatusPagesByteCount"`
 }
 
-func RunElementStatus(device *os.File) ElementStatusHeader {
+type ElementStatus struct {
+	Header ElementStatusHeader `json:"header"`
+	Pages  ElementStatusPages  `json:"pages"`
+}
+
+func RunElementStatus(device *os.File) ElementStatus {
 	cmd := sg.SgCmd{
 		Cdb:            []byte{0xB8, 0x04, 0x00, 0x00, 0xFF, 0xFF, 0x01, 0x00, 0xFF, 0xFF, 0x00, 0x00},
 		DataBuffer:     make([]byte, 64*1000),
@@ -36,10 +40,13 @@ func RunElementStatus(device *os.File) ElementStatusHeader {
 	syscallerr, scsierr := sg.ExecCmd(&cmd, device)
 	util.PanicIfError(syscallerr)
 	util.PanicIfError(scsierr)
-	return newElementStatus(&cmd)
+	return ElementStatus{
+		Header: newElementStatusHeader(&cmd),
+		Pages:  newElementStatusPages(&cmd),
+	}
 }
 
-func newElementStatus(cmd *sg.SgCmd) ElementStatusHeader {
+func newElementStatusHeader(cmd *sg.SgCmd) ElementStatusHeader {
 	buffer := cmd.DataBuffer[0:8]
 	return ElementStatusHeader{
 		FirstElementAddressReported: binary.BigEndian.Uint16(buffer[0:2]),
@@ -48,7 +55,6 @@ func newElementStatus(cmd *sg.SgCmd) ElementStatusHeader {
 		ElementStatusPagesByteCount: uint32(buffer[5])<<16 |
 			uint32(buffer[6])<<8 |
 			uint32(buffer[7]),
-		ElementStatusPages: newElementStatusPages(cmd),
 	}
 }
 

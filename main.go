@@ -51,7 +51,7 @@ func main() {
 type jsonResponse struct {
 	HasError      bool                       `json:"hasError"`
 	MediaChangers []cmd.DeviceIdentification `json:"mediaChangers"`
-	ElementStatus cmd.ElementStatusHeader    `json:"elementStatus"`
+	ElementStatus cmd.ElementStatus          `json:"elementStatus"`
 }
 
 // Recover panics and log them in JSON format ending process.
