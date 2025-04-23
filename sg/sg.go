@@ -62,6 +62,10 @@ type SgCmd struct {
 	Flags          uint32
 }
 
+// func (x *SgCmd) Get() {
+
+// }
+
 func ExecCmd(cmd *SgCmd, device *os.File) (syscallerr error, scsierr error) {
 	// Setup sg_io_hdr structure
 	hdr := sgIoHdr{
@@ -86,10 +90,21 @@ func ExecCmd(cmd *SgCmd, device *os.File) (syscallerr error, scsierr error) {
 	)
 
 	if errno != 0 {
-		syscallerr = fmt.Errorf("IOCTL failed: %v", errno)
+		syscallerr = fmt.Errorf("IOCTL status:%v", errno)
 	}
+
 	if hdr.Status != 0 {
-		scsierr = fmt.Errorf("SCSI Command failed with status: %d", hdr.Status)
+		if hdr.SbLenWr > 0 {
+			senseKey := fmt.Sprintf("%02x", cmd.SenseBuffer[2]&0x0F)
+			asc := fmt.Sprintf("%02x", cmd.SenseBuffer[12])
+			ascq := fmt.Sprintf("%02x", cmd.SenseBuffer[13])
+			scsierr = fmt.Errorf("SCSI status:%d code:%s message:%s", hdr.Status,
+				fmt.Sprintf("[%s,%s,%s]", senseKey, asc, ascq),
+				parseSenseCode(senseKey, asc, ascq),
+			)
+		} else {
+			scsierr = fmt.Errorf("SCSI status:%d", hdr.Status)
+		}
 	}
 	return syscallerr, scsierr
 }

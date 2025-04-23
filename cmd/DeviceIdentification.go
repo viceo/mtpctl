@@ -21,11 +21,12 @@ type DeviceIdentification struct {
 	VendorIdentification   string   `json:"vendorIdentification"`
 	ProductIdentification  string   `json:"productIdentification"`
 	UnitSerialNumber       string   `json:"unitSerialNumber"`
+	SenseBuffer            string   `json:"senseBuffer"`
 }
 
 func RunDeviceIdentification(device *os.File) DeviceIdentification {
 	cmd := sg.SgCmd{
-		Cdb:            []byte{0x12, 0x01, 0x83, 0x00, 0xFF, 0x00},
+		Cdb:            []byte{0x12, 0x00, 0x83, 0x00, 0xFF, 0x00},
 		DataBuffer:     make([]byte, 96),
 		SenseBuffer:    make([]byte, 32),
 		DxferDirection: sg.SG_DXFER_FROM_DEV,
@@ -55,5 +56,6 @@ func newDeviceIdentification(cmd *sg.SgCmd, device *os.File) DeviceIdentificatio
 		VendorIdentification:   strings.TrimSpace(string(buffer[8:16])),
 		ProductIdentification:  strings.TrimSpace(string(buffer[16:32])),
 		UnitSerialNumber:       strings.TrimSpace(string(buffer[32:42])),
+		SenseBuffer:            strings.TrimSpace(string(cmd.SenseBuffer)),
 	}
 }

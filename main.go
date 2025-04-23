@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strconv"
+	"strings"
 
 	"github.com/viceo/tplibcmd/cmd"
 
@@ -58,7 +60,11 @@ type jsonResponse struct {
 // Manually JSON formatting because marshaling can return error
 func errorHandler() {
 	if r := recover(); r != nil {
-		fmt.Printf("{\"hasError\":true, \"error\": \"%s\"}\n", r)
-		fmt.Println(string(debug.Stack()))
+		var stackTrace string
+		stackTrace = string(debug.Stack())
+		stackTrace = strings.ReplaceAll(stackTrace, "\n", "")
+		stackTrace = strings.ReplaceAll(stackTrace, "\t", " ")
+		stackTrace = strconv.Quote(stackTrace)
+		fmt.Printf("{\"hasError\":true, \"error\": \"%s\", \"trace\": %s}\n", r, stackTrace)
 	}
 }
