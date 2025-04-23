@@ -21,7 +21,6 @@ type DeviceIdentification struct {
 	VendorIdentification   string   `json:"vendorIdentification"`
 	ProductIdentification  string   `json:"productIdentification"`
 	UnitSerialNumber       string   `json:"unitSerialNumber"`
-	SenseBuffer            string   `json:"senseBuffer"`
 }
 
 func RunDeviceIdentification(device *os.File) DeviceIdentification {
@@ -56,6 +55,5 @@ func newDeviceIdentification(cmd *sg.SgCmd, device *os.File) DeviceIdentificatio
 		VendorIdentification:   strings.TrimSpace(string(buffer[8:16])),
 		ProductIdentification:  strings.TrimSpace(string(buffer[16:32])),
 		UnitSerialNumber:       strings.TrimSpace(string(buffer[32:42])),
-		SenseBuffer:            strings.TrimSpace(string(cmd.SenseBuffer)),
 	}
 }
