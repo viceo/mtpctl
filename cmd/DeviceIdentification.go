@@ -24,8 +24,8 @@ type DeviceIdentificationPage struct {
 }
 
 type DeviceIdentification struct {
-	Page      DeviceIdentificationPage `json:"page"`
-	SenseData sg.SgSenseData           `json:"senseData"`
+	Page      *DeviceIdentificationPage `json:"page"`
+	SenseData *sg.SgSenseData           `json:"senseData"`
 }
 
 type IDeviceIdentification interface {
@@ -59,9 +59,9 @@ func RunDeviceIdentification(device *os.File) DeviceIdentification {
 	}
 }
 
-func newDeviceIdentificationPage(cmd *sg.SgCmd, device *os.File) DeviceIdentificationPage {
+func newDeviceIdentificationPage(cmd *sg.SgCmd, device *os.File) *DeviceIdentificationPage {
 	buffer := cmd.DataBuffer[0:42]
-	return DeviceIdentificationPage{
+	return &DeviceIdentificationPage{
 		Device:                 device,
 		DeviceName:             device.Name(),
 		PheripherialQualifier:  buffer[0] >> 4,

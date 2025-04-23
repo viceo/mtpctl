@@ -76,8 +76,8 @@ func (x SgCmd) GetDataSlice(from uint16, to uint16) (clone []byte) {
 	return clone
 }
 
-func (x *SgCmd) GetSenseData() SgSenseData {
-	return SgSenseData{
+func (x *SgCmd) GetSenseData() *SgSenseData {
+	return &SgSenseData{
 		SenseLength: uint8(len(x.SenseBuffer)),
 		SenseKey:    fmt.Sprintf("%02x", x.SenseBuffer[2]&0x0F),
 		Asc:         fmt.Sprintf("%02x", x.SenseBuffer[12]),
