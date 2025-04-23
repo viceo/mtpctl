@@ -23,7 +23,7 @@ type ElementStatusHeader struct {
 	ElementStatusPages          ElementStatusPages `json:"elementStatusPages"`
 }
 
-func Run(device *os.File) ElementStatusHeader {
+func RunElementStatus(device *os.File) ElementStatusHeader {
 	cmd := sg.SgCmd{
 		Cdb:            []byte{0xB8, 0x04, 0x00, 0x00, 0xFF, 0xFF, 0x01, 0x00, 0xFF, 0xFF, 0x00, 0x00},
 		DataBuffer:     make([]byte, 64*1000),

@@ -23,7 +23,7 @@ type DeviceIdentification struct {
 	UnitSerialNumber       string   `json:"unitSerialNumber"`
 }
 
-func Run(device *os.File) DeviceIdentification {
+func RunDeviceIdentification(device *os.File) DeviceIdentification {
 	cmd := sg.SgCmd{
 		Cdb:            []byte{0x12, 0x01, 0x83, 0x00, 0xFF, 0x00},
 		DataBuffer:     make([]byte, 96),

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"runtime/debug"
 
-	inquiry "github.com/viceo/tplibcmd/cmd/0x12"
-	readElementStatus "github.com/viceo/tplibcmd/cmd/0xb8"
+	"github.com/viceo/tplibcmd/cmd"
+
 	"github.com/viceo/tplibcmd/util"
 )
 
@@ -18,7 +18,7 @@ func main() {
 	paths, err := filepath.Glob("/dev/sg*")
 	util.PanicIfError(err)
 
-	var mediaChangers []inquiry.DeviceIdentification
+	var mediaChangers []cmd.DeviceIdentification
 
 	for _, p := range paths {
 		// Open SCSI device
@@ -27,14 +27,14 @@ func main() {
 		defer device.Close()
 
 		// Inquiry device
-		idPage := inquiry.Run(device)
+		idPage := cmd.RunDeviceIdentification(device)
 		if idPage.PheripherialDeviceType == 8 {
 			mediaChangers = append(mediaChangers, idPage)
 		}
 
 	}
 
-	elementStatus := readElementStatus.Run(mediaChangers[0].Device)
+	elementStatus := cmd.RunElementStatus(mediaChangers[0].Device)
 
 	response, err := json.Marshal(jsonResponse{
 		MediaChangers: mediaChangers,
@@ -49,9 +49,9 @@ func main() {
 
 // JSON response always expects no errors
 type jsonResponse struct {
-	HasError      bool                                  `json:"hasError"`
-	MediaChangers []inquiry.DeviceIdentification        `json:"mediaChangers"`
-	ElementStatus readElementStatus.ElementStatusHeader `json:"elementStatus"`
+	HasError      bool                       `json:"hasError"`
+	MediaChangers []cmd.DeviceIdentification `json:"mediaChangers"`
+	ElementStatus cmd.ElementStatusHeader    `json:"elementStatus"`
 }
 
 // Recover panics and log them in JSON format ending process.
