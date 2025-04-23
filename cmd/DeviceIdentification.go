@@ -26,7 +26,7 @@ type DeviceIdentification struct {
 
 func RunDeviceIdentification(device *os.File) DeviceIdentification {
 	cmd := sg.SgCmd{
-		Cdb:            []byte{0x12, 0x00, 0x83, 0x00, 0xFF, 0x00},
+		Cdb:            []byte{0x12, 0x01, 0x83, 0x00, 0xFF, 0x00},
 		DataBuffer:     make([]byte, 96),
 		SenseBuffer:    make([]byte, 32),
 		DxferDirection: sg.SG_DXFER_FROM_DEV,
