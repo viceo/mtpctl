@@ -1,4 +1,4 @@
-package cmd0x12
+package cmd
 
 import (
 	"os"
@@ -8,22 +8,23 @@ import (
 	"github.com/viceo/tplibcmd/util"
 )
 
-type DeviceIdentificationPage struct {
+type DeviceIdentification struct {
 	cmd                    sg.SgCmd
-	Device                 string `json:"device"`
-	PheripherialQualifier  uint8  `json:"pheripherialQualifier"`
-	PheripherialDeviceType uint8  `json:"pheripherialDeviceType"`
-	PageCode               uint8  `json:"pageCode"`
-	PageLength             uint8  `json:"pageLength"`
-	CodeSet                uint8  `json:"codeSet"`
-	IdentifierType         uint8  `json:"identifierType"`
-	IdentifierLength       uint8  `json:"identifierLength"`
-	VendorIdentification   string `json:"vendorIdentification"`
-	ProductIdentification  string `json:"productIdentification"`
-	UnitSerialNumber       string `json:"unitSerialNumber"`
+	Device                 *os.File `json:"-"`
+	DeviceName             string   `json:"device"`
+	PheripherialQualifier  uint8    `json:"pheripherialQualifier"`
+	PheripherialDeviceType uint8    `json:"pheripherialDeviceType"`
+	PageCode               uint8    `json:"pageCode"`
+	PageLength             uint8    `json:"pageLength"`
+	CodeSet                uint8    `json:"codeSet"`
+	IdentifierType         uint8    `json:"identifierType"`
+	IdentifierLength       uint8    `json:"identifierLength"`
+	VendorIdentification   string   `json:"vendorIdentification"`
+	ProductIdentification  string   `json:"productIdentification"`
+	UnitSerialNumber       string   `json:"unitSerialNumber"`
 }
 
-func NewDeviceIdentificationPage(device *os.File) DeviceIdentificationPage {
+func NewDeviceIdentification(device *os.File) DeviceIdentification {
 	cmd := sg.SgCmd{
 		Cdb:            []byte{0x12, 0x01, 0x83, 0x00, 0xFF, 0x00},
 		DataBuffer:     make([]byte, 96),
@@ -37,9 +38,10 @@ func NewDeviceIdentificationPage(device *os.File) DeviceIdentificationPage {
 	util.PanicIfError(syscallerr)
 	util.PanicIfError(scsierr)
 
-	return DeviceIdentificationPage{
+	return DeviceIdentification{
 		cmd:                    cmd,
-		Device:                 device.Name(),
+		Device:                 device,
+		DeviceName:             device.Name(),
 		PheripherialQualifier:  cmd.DataBuffer[0] >> 4,
 		PheripherialDeviceType: cmd.DataBuffer[0] & 0x0F,
 		PageCode:               cmd.DataBuffer[1],
