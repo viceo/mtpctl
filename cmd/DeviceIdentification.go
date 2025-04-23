@@ -28,9 +28,21 @@ type DeviceIdentification struct {
 	SenseData sg.SgSenseData           `json:"senseData"`
 }
 
+type IDeviceIdentification interface {
+	Init()
+	GetCDB() []byte
+}
+
 func RunDeviceIdentification(device *os.File) DeviceIdentification {
 	cmd := sg.SgCmd{
-		Cdb:            []byte{0x12, 0x01, 0x83, 0x00, 0xFF, 0x00},
+		Cdb: []byte{
+			0x12,
+			0x01,
+			0x83,
+			0x00,
+			0xFF,
+			0x00,
+		},
 		DataBuffer:     make([]byte, 128),
 		SenseBuffer:    make([]byte, 16),
 		DxferDirection: sg.SG_DXFER_FROM_DEV,

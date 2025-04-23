@@ -28,7 +28,7 @@ const (
 	SG_INTERFACE_USB = 'U'
 )
 
-type sgIoHdr struct {
+type SgIoHdr struct {
 	InterfaceID    int32
 	DxferDirection int32
 	CmdLen         uint8
@@ -70,6 +70,12 @@ type SgSenseData struct {
 	Ascq        string `json:"ascq"`
 }
 
+func (x SgCmd) GetDataSlice(from uint16, to uint16) (clone []byte) {
+	clone = make([]byte, len(x.DataBuffer[from:to]))
+	copy(clone, x.DataBuffer[from:to])
+	return clone
+}
+
 func (x *SgCmd) GetSenseData() SgSenseData {
 	return SgSenseData{
 		SenseLength: uint8(len(x.SenseBuffer)),
@@ -81,7 +87,7 @@ func (x *SgCmd) GetSenseData() SgSenseData {
 
 func ExecCmd(cmd *SgCmd, device *os.File) (syscallerr error) {
 	// Setup sg_io_hdr structure
-	hdr := sgIoHdr{
+	hdr := SgIoHdr{
 		InterfaceID:    SG_INTERFACE_V3,
 		DxferDirection: cmd.DxferDirection,
 		CmdLen:         uint8(len(cmd.Cdb)),         // Command length (cdb)

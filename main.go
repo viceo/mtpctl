@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/viceo/tplibcmd/cmd"
+	"github.com/viceo/tplibcmd/cmd/ibm"
+	"github.com/viceo/tplibcmd/cmd/spectra"
 
 	"github.com/viceo/tplibcmd/util"
 )
@@ -36,7 +38,14 @@ func main() {
 
 	}
 
-	elementStatus := cmd.RunElementStatus(mediaChangers[0].Page.Device)
+	var elementStatusImpl cmd.IElementStatus
+	switch strings.ToUpper(mediaChangers[0].Page.VendorIdentification) {
+	case "SPECTRA":
+		elementStatusImpl = spectra.SPECTRA_TFINITY{}
+	default:
+		elementStatusImpl = ibm.IBM_TS4500{}
+	}
+	elementStatus := cmd.RunElementStatus(elementStatusImpl, mediaChangers[0].Page.Device)
 
 	response, err := json.Marshal(jsonResponse{
 		MediaChangers: mediaChangers,
