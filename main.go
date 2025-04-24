@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/viceo/tplibcmd/cli"
 	"github.com/viceo/tplibcmd/util"
@@ -35,7 +32,6 @@ func main() {
 		elementStatusCmd,
 	)
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		util.PanicIfError(err)
 	}
 }

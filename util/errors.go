@@ -24,6 +24,6 @@ func ErrorHandler() {
 		stackTrace = strings.ReplaceAll(stackTrace, "\t", " ")
 		stackTrace = strconv.Quote(stackTrace)
 		fmt.Printf("{\"hasError\":true, \"error\": \"%s\", \"trace\": %s}\n", r, stackTrace)
-		os.Exit(2)
+		os.Exit(1)
 	}
 }
