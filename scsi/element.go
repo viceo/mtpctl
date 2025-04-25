@@ -98,7 +98,7 @@ func (ElementStatus) NewDataTransferElementDescriptor(buffer []byte, page *Eleme
 	}
 }
 
-func RunElementStatus[T IElementStatus](impl T, device *os.File) ElementStatus {
+func RunElementStatus(impl IElementStatus, device *os.File) ElementStatus {
 	cmd := sg.SgCmd{
 		Cdb: []byte{
 			0xB8, /* Operation Code */
