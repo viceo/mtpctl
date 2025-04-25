@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/viceo/tplibcmd/cmd"
+	"github.com/viceo/tplibcmd/scsi"
 )
 
-type SPECTRA_TFINITY struct{ cmd.ElementStatus }
+type SPECTRA_TFINITY struct{ scsi.ElementStatus }
 
-func (x SPECTRA_TFINITY) NewDataTransferElementDescriptor(buffer []byte, page *cmd.ElementStatusPage) *cmd.DataTransferElementDescriptor {
-	descriptor := cmd.ElementStatus{}.NewDataTransferElementDescriptor(buffer, page)
+func (x SPECTRA_TFINITY) NewDataTransferElementDescriptor(buffer []byte, page *scsi.ElementStatusPage) *scsi.DataTransferElementDescriptor {
+	descriptor := scsi.ElementStatus{}.NewDataTransferElementDescriptor(buffer, page)
 	descriptor.AdditionalSenseValue = x.ascmap(descriptor.AdditionalSenseCode, descriptor.AdditionalSenseCodeQualifier)
 	return descriptor
 }

@@ -2,10 +2,11 @@ package util
 
 import (
 	"fmt"
-	"os"
 	"runtime/debug"
 	"strconv"
 	"strings"
+
+	"github.com/viceo/tplibcmd/dto"
 )
 
 func PanicIfError(e error) {
@@ -14,16 +15,19 @@ func PanicIfError(e error) {
 	}
 }
 
-// Recover panics and log them in JSON format ending process.
-// Manually JSON formatting because marshaling can return error
-func ErrorHandler() {
+// Error Trap
+func ErrorTrap() {
 	if r := recover(); r != nil {
 		var stackTrace string
 		stackTrace = string(debug.Stack())
 		stackTrace = strings.ReplaceAll(stackTrace, "\n", "")
 		stackTrace = strings.ReplaceAll(stackTrace, "\t", " ")
 		stackTrace = strconv.Quote(stackTrace)
-		fmt.Printf("{\"hasError\":true, \"error\": \"%s\", \"trace\": %s}\n", r, stackTrace)
-		os.Exit(1)
+		errorResponse := dto.CommandResponse{
+			HasError:   true,
+			Error:      fmt.Sprintf("%s", r),
+			StackTrace: stackTrace,
+		}
+		errorResponse.Print()
 	}
 }

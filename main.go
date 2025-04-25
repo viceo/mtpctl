@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/viceo/tplibcmd/cli"
+	"github.com/viceo/tplibcmd/cmd"
 	"github.com/viceo/tplibcmd/util"
 )
 
 func main() {
-	defer util.ErrorHandler()
+	defer util.ErrorTrap()
 
 	var rootCmd = &cobra.Command{
 		Use:   "tplibcmd",
@@ -15,16 +15,18 @@ func main() {
 	}
 
 	var deviceIdentificationCmd = &cobra.Command{
-		Use:   "device-id [sg-device]",
+		Use:   "device-id sg-device",
 		Short: "Get device identification",
 		Args:  cobra.ExactArgs(1),
-		Run:   cli.DeviceIdentificationCmd,
+		Run:   cmd.DeviceIdentificationCmd,
+		// SilenceErrors: true,
 	}
 
 	var elementStatusCmd = &cobra.Command{
-		Use:   "element-status",
+		Use:   "element-status [sg-device]",
 		Short: "Get element status page",
-		Run:   cli.ExecElementStatusCmd,
+		Args:  cobra.ExactArgs(1),
+		Run:   cmd.ExecElementStatusCmd,
 	}
 
 	rootCmd.AddCommand(
