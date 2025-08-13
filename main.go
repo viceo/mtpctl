@@ -15,7 +15,7 @@ func main() {
 	}
 
 	var deviceIdentificationCmd = &cobra.Command{
-		Use:   "device-id sg-device",
+		Use:   "device-id [sg-device]",
 		Short: "Get device identification",
 		Args:  cobra.ExactArgs(1),
 		Run:   cmd.DeviceIdentificationCmd,
@@ -29,9 +29,17 @@ func main() {
 		Run:   cmd.ExecElementStatusCmd,
 	}
 
+	var logSenseCdm = &cobra.Command{
+		Use:   "log-sense [sg-device]",
+		Short: "Get log sense flags (from a tape drive)",
+		Args:  cobra.ExactArgs(1),
+		Run:   cmd.LogSenseCmd,
+	}
+
 	rootCmd.AddCommand(
 		deviceIdentificationCmd,
 		elementStatusCmd,
+		logSenseCdm,
 	)
 	if err := rootCmd.Execute(); err != nil {
 		util.PanicIfError(err)
